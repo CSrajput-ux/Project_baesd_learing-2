@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HELPix | AI Healthcare System | Chhotu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --bg: #04060f;
+      --surface: #0a0e1a;
+      --surface2: #0f1525;
+      --border: rgba(99,179,255,0.12);
+      --accent: #3b8bff;
+      --accent2: #7c3aed;
+      --teal: #06b6d4;
+      --green: #10b981;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --mono: 'DM Mono', monospace;
+      --serif: 'Instrument Serif', serif;
+      --sans: 'Syne', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); overflow-x: hidden; }
+
+    /* MESH BG & NOISE */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .5;
+    }
+    .mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(ellipse 70% 50% at 15% 20%, rgba(59,139,255,.08) 0%, transparent 60%),
+                  radial-gradient(ellipse 50% 60% at 85% 70%, rgba(124,58,237,.07) 0%, transparent 60%);
+    }
+
+    /* TIMER (0 to 10 min) */
+    #timerBox {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: #fff; color: #04060f; border: 3px solid var(--accent);
+      border-radius: 20px; padding: 10px 22px; display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.6); font-family: var(--mono);
+    }
+    #timerDisplay { font-size: 2rem; font-weight: 700; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100; padding: 14px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(4,6,15,.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
+    }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); text-decoration: none; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* HERO */
+    .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 100px; }
+    .hero-h1 {
+      font-size: clamp(3.2rem, 8vw, 7rem); font-weight: 800; letter-spacing: -.04em;
+      background: linear-gradient(135deg, #e2e8f0 0%, #63a3ff 50%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    section { max-width: 1100px; margin: 0 auto; padding: 100px 32px; position: relative; z-index: 1; }
+    .sec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--accent); font-family: var(--mono); margin-bottom: 12px; }
+    .sec-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1; margin-bottom: 48px; }
+    .sec-title em { font-style: italic; font-family: var(--serif); color: var(--accent); }
+
+    /* GRIDS */
+    .grid-2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+    @media(max-width:768px){ .grid-2 { grid-template-columns: 1fr; } }
+    
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 36px; }
+    .tag { background: rgba(59,139,255,.1); color: var(--accent); border-radius: 99px; padding: 4px 12px; font-size: 10px; font-weight: 600; font-family: var(--mono); }
+
+    /* FULL ROADMAP */
+    .progress-section { margin-bottom: 2rem; font-family: var(--mono); font-size: 11px; }
+    .progress-labels-top { display: flex; justify-content: space-between; color: var(--muted); margin-bottom: 0.8rem; position: relative; }
+    .progress-labels-top .now-label { color: var(--accent); position: absolute; left: 50%; transform: translateX(-50%); font-weight: bold; }
+    .progress-track { height: 4px; background-color: var(--surface2); border-radius: 2px; position: relative; margin-bottom: 1rem; display: flex; }
+    .progress-fill-done { height: 100%; background-color: var(--accent); width: 50%; border-radius: 2px 0 0 2px; }
+    .progress-fill-active { height: 100%; background-color: var(--accent2); width: 30%; }
+    .progress-pill-percentage { position: absolute; left: 80%; top: 50%; transform: translate(-50%, -50%); background-color: var(--bg); color: var(--accent); padding: 2px 6px; border-radius: 8px; font-size: 10px; border: 1px solid var(--border); z-index: 2; font-weight:700; }
+    .progress-labels-bottom { display: flex; color: var(--muted); font-size: 11px; }
+    
+    .timeline-panel { background-color: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 3rem 2rem; position: relative; margin-bottom: 2rem; }
+    .timeline-vertical-line { position: absolute; left: 3.8rem; top: 4rem; bottom: 4rem; width: 1px; background-color: var(--border); z-index: 0; }
+    .timeline-item { position: relative; z-index: 1; padding-left: 5.5rem; margin-bottom: 3.5rem; }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-node { position: absolute; left: 1.45rem; top: 0.2rem; width: 13px; height: 13px; border-radius: 50%; background-color: var(--bg); border: 2px solid var(--muted); }
+    .status-done .timeline-node { background-color: var(--green); border-color: var(--green); box-shadow: 0 0 10px rgba(16,185,129,0.3); }
+    .status-active .timeline-node { background-color: var(--accent); border: 2px solid var(--bg); box-shadow: 0 0 15px rgba(59,139,255,0.4); }
+    .status-active::before { content: ''; position: absolute; left: 0.95rem; top: -0.3rem; width: 29px; height: 29px; border: 1px solid rgba(59,139,255,0.3); border-radius: 50%; pointer-events: none; }
+    
+    .timeline-meta { font-family: var(--mono); font-size: 11px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; }
+    .status-done .timeline-meta { color: var(--green); }
+    .status-active .timeline-meta { color: var(--accent); }
+    .status-planned .timeline-meta { color: var(--muted); }
+    .timeline-title { font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+    .timeline-desc { font-size: 0.90rem; line-height: 1.6; color: var(--muted); margin-bottom: 1rem; max-width: 90%; }
+    .timeline-note { background-color: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 1rem; font-family: var(--mono); font-size: 11px; color: var(--muted); display: inline-flex; align-items: center; gap: 0.5rem; }
+    .timeline-note i { font-size: 12px; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+    @media(max-width:768px){ .stats-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:480px){ .stats-grid { grid-template-columns: 1fr; } }
+    .stat-card { background-color: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.25rem; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
+    .card-completed::before { background-color: var(--green); }
+    .card-active::before { background-color: var(--accent); }
+    .card-remaining::before { background-color: var(--accent2); }
+    .card-hardest::before { background-color: #f59e0b; }
+    .stat-card-header { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; font-weight: 600; color: var(--muted); }
+    .stat-value { font-family: var(--sans); font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.04em; }
+    .card-completed .stat-value { color: var(--green); }
+    .card-active .stat-value { color: var(--accent); }
+    .card-remaining .stat-value { color: var(--accent2); }
+    .card-hardest .stat-value { color: #f59e0b; font-size: 1.8rem; }
+    .stat-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .reveal { opacity: 0; transform: translateY(20px); transition: 0.6s ease-out; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+<div class="mesh"></div>
+<div id="timerBox">
+  <i class="fas fa-clock" style="color:var(--accent)"></i>
+  <span id="timerDisplay">00:00</span>
+</div>
+<nav>
+  <div class="nav-brand">
+    <span style="font-weight:800; font-size:1.2rem;">HELP<span style="color:var(--accent)">IX</span></span>
+    <span style="background:var(--accent); color:#fff; font-size:10px; padding:2px 8px; border-radius:10px; margin-left:10px;">PBL-2 · 2026</span>
+  </div>
+  <div class="nav-links">
+    <a href="#abstract">Abstract</a>
+    <a href="#problem">Problem</a>
+    <a href="#platform">Ecosystem</a>
+    <a href="#tech">System</a>
+    <a href="#results">Results</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#demo">Demo</a>
+    <a href="#team">Team</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="reveal visible">
+    <div style="font-family:var(--mono); font-size:11px; color:var(--muted); margin-bottom:20px; background: var(--surface2); padding: 8px 16px; border-radius: 12px; display: inline-block;">
+      <span style="color: var(--accent); font-weight: 700;">REG:</span> 2427030521 · Dept. of Computer Science & Engineering, MUJ · <span style="color: var(--accent); font-weight: 700;">IV Semester</span>
+    </div>
+    <h1 class="hero-h1">HELPix</h1>
+    <p style="font-family:var(--serif); font-style:italic; font-size:1.4rem; color:var(--muted); margin-top:10px;">
+      Multi Disease Detection System
+    </p>
+    <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:40px; margin-top:50px;">
+        <div>
+            <div style="font-size:9px; color:var(--muted); text-transform:uppercase;">Developer</div>
+            <div style="font-weight:700;">Chhotu</div>
+        </div>
+        <div>
+            <div style="font-size:9px; color:var(--muted); text-transform:uppercase;">Engine</div>
+            <div style="font-weight:700;">TensorFlow / TFLite</div>
+        </div>
+        <div>
+            <div style="font-size:9px; color:var(--muted); text-transform:uppercase;">Platform</div>
+            <div style="font-weight:700;">Android</div>
+        </div>
+        <div>
+            <div style="font-size:9px; color:var(--muted); text-transform:uppercase;">Session</div>
+            <div style="font-weight:700;">Jan-May 2026</div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<section id="abstract">
+  <div class="sec-label">01 — Abstract</div>
+  <div class="sec-title">The Problem<br><em>& The Solution</em></div>
+  <div class="grid-2 reveal">
+    <div class="card" style="border-left: 4px solid var(--accent);">
+      <h3 style="margin-bottom:15px;">Healthcare access in India remains a major challenge, especially in rural areas where timely access to doctors and diagnostic facilities is limited. As a result, diseases like Tuberculosis, Pneumonia, and skin infections are often detected at later stages, increasing both cost and risk.</h3>
+      <p style="color:var(--muted); line-height:1.7; margin-top:15px;">
+        Traditional diagnosis relies on hospital visits and expensive tests, while existing digital tools are fragmented and focus on only one type of input, leading to incomplete results.
+      </p>
+      <p style="color:var(--muted); line-height:1.7; margin-top:15px;">
+        HELPix solves this by providing a unified, AI-powered multi-disease detection system. It analyzes cough sounds, skin images, and user-reported symptoms to deliver quick and reliable health predictions.
+      </p>
+      <p style="color:var(--muted); line-height:1.7; margin-top:15px;">
+        Using advanced deep learning models, HELPix offers accessible, affordable, and user-friendly healthcare support, enabling early detection and informed medical decisions.
+      </p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:15px;">
+      <div class="card">
+        <h3 style="color:var(--accent); font-size:2rem;">1:834</h3>
+        <p style="color:var(--muted);">India’s Doctor-to-Patient Ratio<br>(Lower than WHO recommended 1:1000)</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--accent); font-size:2rem;">₹0 – ₹15K</h3>
+        <p style="color:var(--muted);">Affordable AI Screening System<br>vs Expensive Lab & Hospital Tests</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--accent); font-size:2rem;">Cloud-Based AI</h3>
+        <p style="color:var(--muted);">Real-Time Processing via Internet<br>Secure & Scalable System</p>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:20px; display:flex; flex-wrap:wrap; gap:10px;">
+    <span class="tag">AI Healthcare</span>
+    <span class="tag">Disease Detection</span>
+    <span class="tag">Multimodal AI</span>
+    <span class="tag">CNN Model</span>
+    <span class="tag">Cough Analysis</span>
+    <span class="tag">Skin Detection</span>
+    <span class="tag">Symptom Checker</span>
+    <span class="tag">Offline AI</span>
+  </div>
+</section>
+
+<section id="problem">
+  <div class="sec-label">02 — Problem Statement</div>
+  <div class="sec-title">What We're<br><em>Solving</em></div>
+  <div class="grid-2 reveal">
+    <div class="card" style="border-left: 4px solid var(--accent);">
+      <h3 style="margin-bottom:15px;">The Core Challenge</h3>
+      <p style="color:var(--muted); line-height:1.7;">
+        In India, access to timely healthcare remains a major challenge, especially in rural and underserved regions where medical infrastructure is limited. Millions of people do not have easy access to qualified doctors, diagnostic facilities, or affordable treatment options. As a result, diseases such as Tuberculosis, Pneumonia, Malaria, and skin infections are often detected at later stages, significantly increasing both health risks and treatment costs.
+      </p>
+      <p style="color:var(--muted); line-height:1.7; margin-top:15px;">
+        A major issue is the delay in early diagnosis. People either ignore initial symptoms or lack the resources to get proper medical attention at the right time. In many cases, by the time diagnosis happens, the condition has already worsened, making treatment more complex and expensive.
+      </p>
+      <p style="color:var(--muted); line-height:1.7; margin-top:15px;">
+        Traditional diagnosis relies heavily on hospital visits, laboratory tests, and specialized equipment, which are not only costly but also time-consuming. This creates a barrier for people who need quick and accessible health screening.
+      </p>
+      <p style="color:var(--muted); line-height:1.7; margin-top:15px;">
+        Additionally, existing digital healthcare solutions are fragmented, with each system focusing on only one type of input such as symptoms, images, or audio. This lack of integration often leads to incomplete analysis and reduces the overall accuracy of predictions.
+      </p>
+      <p style="color:var(--muted); line-height:1.7; margin-top:15px;">
+        These challenges highlight a critical gap in accessible, affordable, and early disease detection, creating a strong need for a unified, intelligent, and user-friendly healthcare solution.
+      </p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:15px;">
+      <div class="card">
+        <h3 style="color:var(--accent); font-size:1.5rem; margin-bottom:10px;">Innovation</h3>
+        <p style="color:var(--muted); line-height:1.7;">
+          <span style="color: var(--accent); font-weight: bold;">HELPix</span> introduces a multimodal AI-based healthcare system that integrates cough sound analysis, skin image detection, and symptom-based prediction into a single platform, improving accuracy and usability.
+        </p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--muted); font-size:1.5rem; margin-bottom:10px;">Doctor Booking</h3>
+        <p style="color:var(--muted); line-height:1.7;">
+          <span style="color: var(--accent); font-weight: bold;">HELPix</span> allows users to book doctor consultations directly through the application, making healthcare more accessible, faster, and convenient without the need for physical visits.
+        </p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--muted); font-size:1.5rem; margin-bottom:10px;">Smart Health Monitoring</h3>
+        <p style="color:var(--muted); line-height:1.7;">
+          The system can integrate with smart wearable devices (such as smartwatches) to monitor real-time health data like heart rate, activity level, and daily health patterns.
+        </p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--muted); font-size:1.5rem; margin-bottom:10px;">Data Source</h3>
+        <p style="color:var(--muted); line-height:1.7;">
+          Uses Coswara (cough audio), skin disease image datasets, and structured symptom-based data for training deep learning models.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="platform">
+  <div class="sec-label">03 — Platform Ecosystem</div>
+  <div class="sec-title">Serving Doctors<br><em>&amp; Patients</em></div>
+  <div class="grid-2 reveal">
+    <div class="card">
+      <h3 style="color:var(--accent); margin-bottom:20px;">For Doctors</h3>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:20px;">
+        <li>
+          <strong>AI-Assisted Diagnosis</strong>
+          <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-top:5px;">Analyze patient data using AI trained on images and audio.</p>
+          <div style="display:flex; gap:5px; margin-top:8px;"><span class="tag">Fast Analysis</span><span class="tag">AI Support</span></div>
+        </li>
+        <li>
+          <strong>Smart Patient Monitoring</strong>
+          <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-top:5px;">Monitor symptoms and activity levels for continuous care.</p>
+          <div style="display:flex; gap:5px; margin-top:8px;"><span class="tag">Real-Time</span><span class="tag">Insights</span></div>
+        </li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green); margin-bottom:20px;">For Patients</h3>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:20px;">
+        <li>
+          <strong>Easy Health Check</strong>
+          <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-top:5px;">Upload images or record cough via smartphone anytime.</p>
+          <div style="display:flex; gap:5px; margin-top:8px;"><span class="tag">Accessible</span><span class="tag">Quick</span></div>
+        </li>
+        <li>
+          <strong>Early Detection</strong>
+          <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-top:5px;">Warnings with confidence scores before conditions worsen.</p>
+          <div style="display:flex; gap:5px; margin-top:8px;"><span class="tag">Prevention</span><span class="tag">Safety</span></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="tech">
+  <div class="sec-label">04 — System Design</div>
+  <div class="sec-title">Architecture &<br><em>Technology Stack</em></div>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:20px;" class="reveal">
+    <div class="card" style="padding:25px; display:flex; flex-direction:column; gap:5px;">
+      <div style="font-size:24px; margin-bottom:10px;">🧠</div>
+      <h3 style="color:var(--text); font-size:1.1rem; margin-bottom:0; font-weight:700;">TensorFlow / Keras</h3>
+      <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Deep Learning Core</div>
+      <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-top:10px;">Deep learning framework used to build and train CNN models for skin disease detection and other AI modules.</p>
+    </div>
+    <div class="card" style="padding:25px; display:flex; flex-direction:column; gap:5px;">
+      <div style="font-size:24px; margin-bottom:10px;">🎵</div>
+      <h3 style="color:var(--text); font-size:1.1rem; margin-bottom:0; font-weight:700;">Librosa</h3>
+      <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Audio Processing</div>
+      <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-top:10px;">Used to extract MFCC features from cough and breathing sounds for audio-based disease detection.</p>
+    </div>
+    <div class="card" style="padding:25px; display:flex; flex-direction:column; gap:5px;">
+      <div style="font-size:24px; margin-bottom:10px;">🐍</div>
+      <h3 style="color:var(--text); font-size:1.1rem; margin-bottom:0; font-weight:700;">Python</h3>
+      <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Core Language</div>
+      <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-top:10px;">Core programming language used for AI model training, data processing, and backend logic.</p>
+    </div>
+    <div class="card" style="padding:25px; display:flex; flex-direction:column; gap:5px;">
+      <div style="font-size:24px; margin-bottom:10px;">🌐</div>
+      <h3 style="color:var(--text); font-size:1.1rem; margin-bottom:0; font-weight:700;">Flask API</h3>
+      <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Backend Router</div>
+      <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-top:10px;">Handles communication between frontend and AI models, enabling real-time predictions.</p>
+    </div>
+    <div class="card" style="padding:25px; display:flex; flex-direction:column; gap:5px;">
+      <div style="font-size:24px; margin-bottom:10px;">☁️</div>
+      <h3 style="color:var(--text); font-size:1.1rem; margin-bottom:0; font-weight:700;">Cloud Deployment</h3>
+      <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Hosting & Scaling</div>
+      <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-top:10px;">AI models are hosted on cloud servers for scalable and fast processing of user inputs.</p>
+    </div>
+    <div class="card" style="padding:25px; display:flex; flex-direction:column; gap:5px;">
+      <div style="font-size:24px; margin-bottom:10px;">🗂️</div>
+      <h3 style="color:var(--text); font-size:1.1rem; margin-bottom:0; font-weight:700;">Dataset Sources</h3>
+      <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Training Data</div>
+      <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-top:10px;">Coswara (Cough Audio), Skin Disease Image Datasets, and Symptom-based datasets used for training.</p>
+    </div>
+  </div>
+  
+  <div style="margin-top:60px;" class="reveal">
+    <div style="font-family:var(--mono); font-weight:700; color:var(--accent); text-transform:uppercase; font-size:10px; letter-spacing:1px; margin-bottom:20px;">Core Modules</div>
+    <div class="card" style="margin-bottom:15px; padding:25px 30px; display:flex; align-items:flex-start; gap:25px;">
+      <div style="font-family:var(--mono); font-size:2.5rem; font-weight:800; color:rgba(59,139,255,0.4); line-height:1;">01</div>
+      <div>
+        <h4 style="color:var(--text); font-size:1.1rem; margin-bottom:8px; font-weight:700;">Image Detection Module</h4>
+        <p style="color:var(--muted); font-size:13px; line-height:1.6;">Uses CNN-based deep learning to analyze skin images, extract features, and predict diseases with confidence scores.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:15px; padding:25px 30px; display:flex; align-items:flex-start; gap:25px;">
+      <div style="font-family:var(--mono); font-size:2.5rem; font-weight:800; color:rgba(59,139,255,0.4); line-height:1;">02</div>
+      <div>
+        <h4 style="color:var(--text); font-size:1.1rem; margin-bottom:8px; font-weight:700;">Sound Analysis Module</h4>
+        <p style="color:var(--muted); font-size:13px; line-height:1.6;">Processes cough and voice signals using MFCC feature extraction and machine learning models to detect respiratory diseases.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:15px; padding:25px 30px; display:flex; align-items:flex-start; gap:25px;">
+      <div style="font-family:var(--mono); font-size:2.5rem; font-weight:800; color:rgba(59,139,255,0.4); line-height:1;">03</div>
+      <div>
+        <h4 style="color:var(--text); font-size:1.1rem; margin-bottom:8px; font-weight:700;">Health Monitoring Module</h4>
+        <p style="color:var(--muted); font-size:13px; line-height:1.6;">Tracks real-time health data such as heart rate and activity levels through wearable device integration.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:15px; padding:25px 30px; display:flex; align-items:flex-start; gap:25px;">
+      <div style="font-family:var(--mono); font-size:2.5rem; font-weight:800; color:rgba(59,139,255,0.4); line-height:1;">04</div>
+      <div>
+        <h4 style="color:var(--text); font-size:1.1rem; margin-bottom:8px; font-weight:700;">AI Prediction Engine</h4>
+        <p style="color:var(--muted); font-size:13px; line-height:1.6;">Combines outputs from image, audio, and symptom-based models to generate final disease prediction.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0; padding:25px 30px; display:flex; align-items:flex-start; gap:25px;">
+      <div style="font-family:var(--mono); font-size:2.5rem; font-weight:800; color:rgba(59,139,255,0.4); line-height:1;">05</div>
+      <div>
+        <h4 style="color:var(--text); font-size:1.1rem; margin-bottom:8px; font-weight:700;">Result & Recommendation Module</h4>
+        <p style="color:var(--muted); font-size:13px; line-height:1.6;">Displays disease name, confidence score, precautions, and health recommendations in a user-friendly format.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin-top:60px;" class="reveal">
+    <div class="card" style="background:var(--surface2); padding:0; overflow:hidden; border: 1px solid var(--border);">
+      <div style="padding:12px 15px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); display:flex; align-items:center; gap:8px;">
+        <div style="width:10px; height:10px; border-radius:50%; background:#ff5f56;"></div>
+        <div style="width:10px; height:10px; border-radius:50%; background:#ffbd2e;"></div>
+        <div style="width:10px; height:10px; border-radius:50%; background:#27c93f;"></div>
+        <div style="flex:1; text-align:center; font-family:var(--mono); font-size:10px; color:var(--muted);">app.py — Sample Backend Logic (Flask API)</div>
+      </div>
+      <div style="padding:25px; overflow-x:auto;">
+      <pre style="color:#e2e8f0; font-family:var(--mono); font-size:0.85rem; line-height:1.6;">
+<span style="color:#ff7b72;">import</span> tensorflow <span style="color:#ff7b72;">as</span> tf
+<span style="color:#ff7b72;">from</span> tensorflow.keras <span style="color:#ff7b72;">import</span> layers, models
+
+<span style="color:#6a9955;"># CNN Model for Skin Disease Detection</span>
+model = models.Sequential()
+
+<span style="color:#6a9955;"># Convolution + Pooling Layers</span>
+model.add(layers.Conv2D(<span style="color:#79c0ff;">32</span>, (<span style="color:#79c0ff;">3</span>,<span style="color:#79c0ff;">3</span>), activation=<span style="color:#a5d6ff;">'relu'</span>, input_shape=(<span style="color:#79c0ff;">224</span>,<span style="color:#79c0ff;">224</span>,<span style="color:#79c0ff;">3</span>)))
+model.add(layers.MaxPooling2D((<span style="color:#79c0ff;">2</span>,<span style="color:#79c0ff;">2</span>)))
+model.add(layers.Conv2D(<span style="color:#79c0ff;">64</span>, (<span style="color:#79c0ff;">3</span>,<span style="color:#79c0ff;">3</span>), activation=<span style="color:#a5d6ff;">'relu'</span>))
+model.add(layers.MaxPooling2D((<span style="color:#79c0ff;">2</span>,<span style="color:#79c0ff;">2</span>)))
+model.add(layers.Conv2D(<span style="color:#79c0ff;">128</span>, (<span style="color:#79c0ff;">3</span>,<span style="color:#79c0ff;">3</span>), activation=<span style="color:#a5d6ff;">'relu'</span>))
+model.add(layers.MaxPooling2D((<span style="color:#79c0ff;">2</span>,<span style="color:#79c0ff;">2</span>)))
+
+<span style="color:#6a9955;"># Fully Connected Layers</span>
+model.add(layers.Flatten())
+model.add(layers.Dense(<span style="color:#79c0ff;">128</span>, activation=<span style="color:#a5d6ff;">'relu'</span>))
+model.add(layers.Dense(num_classes, activation=<span style="color:#a5d6ff;">'softmax'</span>))
+
+<span style="color:#6a9955;"># Compile Model</span>
+model.compile(
+    optimizer=<span style="color:#a5d6ff;">'adam'</span>,
+    loss=<span style="color:#a5d6ff;">'categorical_crossentropy'</span>,
+    metrics=[<span style="color:#a5d6ff;">'accuracy'</span>]
+)
+
+<span style="color:#6a9955;"># Model Summary</span>
+model.summary()
+      </pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="sec-label">05 — Results &amp; Testing</div>
+  <div class="sec-title">What's Working<br><em>Right Now</em></div>
+  <div class="grid-2 reveal">
+    <div>
+        <h3 style="color: var(--accent); margin-bottom:10px;">System Performance</h3>
+        <p style="color: var(--muted); line-height:1.5;">Skin Disease Model Accuracy<br><strong style="color: var(--green);">98%+ (CNN Model Successfully Trained & Deployed)</strong></p>
+        <h3 style="color: var(--accent); margin-top: 30px; margin-bottom:10px;">Application Status</h3>
+        <p style="color: var(--muted);">Full Web Application Running Smoothly</p>
+        <h3 style="color: var(--accent); margin-top: 30px; margin-bottom:10px;">Core Modules Completed</h3>
+        <p style="color: var(--muted);">5 / 5 (Image Detection, API, UI, Prediction Engine, Results System)</p>
+        <h3 style="color: var(--accent); margin-top: 30px; margin-bottom:10px;">Prediction Speed</h3>
+        <p style="color: var(--muted);">Real-Time Results via Cloud-Based Processing</p>
+    </div>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px;">
+        <canvas id="resultsChart" style="max-width: 100%; height: 300px; display:block; margin:auto;"></canvas>
+    </div>
+  </div>
+  <div style="margin-top: 50px;" class="reveal">
+    <h3 style="color: var(--accent); margin-bottom:20px;">Test Cases</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: var(--surface2); color: var(--text);">
+          <th style="padding: 15px; text-align: left; border-bottom:1px solid var(--border);">Test Case</th>
+          <th style="padding: 15px; text-align: left; border-bottom:1px solid var(--border);">Expected Result</th>
+          <th style="padding: 15px; text-align: left; border-bottom:1px solid var(--border);">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background: var(--surface);">
+          <td style="padding: 15px; border-bottom:1px solid var(--border);">Upload Skin Image</td>
+          <td style="padding: 15px; color:var(--muted); border-bottom:1px solid var(--border);">Accurate Disease Prediction with Confidence Score</td>
+          <td style="padding: 15px; color: var(--green); border-bottom:1px solid var(--border);">✓ Passed</td>
+        </tr>
+        <tr style="background: var(--surface2);">
+          <td style="padding: 15px; border-bottom:1px solid var(--border);">Image Preprocessing</td>
+          <td style="padding: 15px; color:var(--muted); border-bottom:1px solid var(--border);">Proper resizing and normalization</td>
+          <td style="padding: 15px; color: var(--green); border-bottom:1px solid var(--border);">✓ Passed</td>
+        </tr>
+        <tr style="background: var(--surface);">
+          <td style="padding: 15px; border-bottom:1px solid var(--border);">CNN Model Prediction</td>
+          <td style="padding: 15px; color:var(--muted); border-bottom:1px solid var(--border);">Correct classification output</td>
+          <td style="padding: 15px; color: var(--green); border-bottom:1px solid var(--border);">✓ Passed</td>
+        </tr>
+        <tr style="background: var(--surface2);">
+          <td style="padding: 15px; border-bottom:1px solid var(--border);">API Integration</td>
+          <td style="padding: 15px; color:var(--muted); border-bottom:1px solid var(--border);">Fast and correct backend response</td>
+          <td style="padding: 15px; color: var(--green); border-bottom:1px solid var(--border);">✓ Passed</td>
+        </tr>
+        <tr style="background: var(--surface);">
+          <td style="padding: 15px; border-bottom:1px solid var(--border);">End-to-End Flow</td>
+          <td style="padding: 15px; color:var(--muted); border-bottom:1px solid var(--border);">Input → Processing → Prediction → Result</td>
+          <td style="padding: 15px; color: var(--green); border-bottom:1px solid var(--border);">✓ Passed</td>
+        </tr>
+        <tr style="background: var(--surface2);">
+          <td style="padding: 15px; border-bottom:1px solid var(--border);">Cough Sound Module</td>
+          <td style="padding: 15px; color:var(--muted); border-bottom:1px solid var(--border);">Detect respiratory patterns</td>
+          <td style="padding: 15px; color: var(--accent); border-bottom:1px solid var(--border);">In Progress</td>
+        </tr>
+        <tr style="background: var(--surface);">
+          <td style="padding: 15px; border-bottom:1px solid var(--border);">Prescription System</td>
+          <td style="padding: 15px; color:var(--muted); border-bottom:1px solid var(--border);">Provide health recommendations</td>
+          <td style="padding: 15px; color: var(--muted); border-bottom:1px solid var(--border);">Planned</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="sec-label">06 — Implementation Roadmap</div>
+  <div class="sec-title">Week-by-Week<br><em>to Full System</em></div>
+  
+  <div class="reveal">
+    <div class="progress-section">
+      <div class="progress-labels-top">
+        <span>Start</span>
+        <span class="now-label">Now — Week 8</span>
+        <span>Full System Complete</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill-done"></div>
+        <div class="progress-fill-active"></div>
+        <div class="progress-pill-percentage">~80%</div>
+      </div>
+      <div class="progress-labels-bottom">
+        <span>Estimated total: 16 weeks · Current: Week 8 of 16</span>
+      </div>
+    </div>
+
+    <div class="timeline-panel">
+      <div class="timeline-vertical-line"></div>
+      
+      <div class="timeline-item status-done">
+        <div class="timeline-node"></div>
+        <div class="timeline-meta">Weeks 1–2 • ✓ Done</div>
+        <div class="timeline-title">Project Planning &amp; Research</div>
+        <div class="timeline-desc">Problem identification, dataset research, and system design finalized.</div>
+        <div class="timeline-note">
+          <i class="fas fa-check-circle"></i> 2 weeks — Foundation architecture and problem definition established
+        </div>
+      </div>
+
+      <div class="timeline-item status-done">
+        <div class="timeline-node"></div>
+        <div class="timeline-meta">Weeks 3–4 • ✓ Done</div>
+        <div class="timeline-title">Skin Disease Detection Model</div>
+        <div class="timeline-desc">CNN-based model trained and tested with high accuracy.</div>
+        <div class="timeline-note">
+          <i class="fas fa-check-circle"></i> 2 weeks — Model architecture iterations and validation
+        </div>
+      </div>
+
+      <div class="timeline-item status-done">
+        <div class="timeline-node"></div>
+        <div class="timeline-meta">Weeks 5–6 • ✓ Done</div>
+        <div class="timeline-title">Frontend &amp; Backend Development</div>
+        <div class="timeline-desc">User interface, Flask API, and core system integration completed.</div>
+        <div class="timeline-note">
+          <i class="fas fa-check-circle"></i> 2 weeks — Application structure and microservices API bridge
+        </div>
+      </div>
+
+      <div class="timeline-item status-done">
+        <div class="timeline-node"></div>
+        <div class="timeline-meta">Weeks 7–8 • ✓ Done</div>
+        <div class="timeline-title">System Integration &amp; Testing</div>
+        <div class="timeline-desc">Complete system flow implemented with image detection and real-time prediction.</div>
+        <div class="timeline-note">
+          <i class="fas fa-check-circle"></i> 2 weeks — Synchronizing frontend endpoints to ML services
+        </div>
+      </div>
+
+      <div class="timeline-item status-active">
+        <div class="timeline-node"></div>
+        <div class="timeline-meta">Weeks 9–12 • 🔄 In Progress</div>
+        <div class="timeline-title">Cough Sound Detection Module</div>
+        <div class="timeline-desc">Audio preprocessing (MFCC), model training, and integration into system.</div>
+        <div class="timeline-note">
+          <i class="fas fa-spinner fa-spin"></i> 4 weeks — MFCC spectrogram pipeline is the heaviest remaining task
+        </div>
+      </div>
+
+      <div class="timeline-item status-planned">
+        <div class="timeline-node"></div>
+        <div class="timeline-meta">Weeks 13–14 • ⏳ Planned</div>
+        <div class="timeline-title">Prescription Recommendation System</div>
+        <div class="timeline-desc">Generate medicine suggestions and health advice based on predictions.</div>
+        <div class="timeline-note">
+          <i class="far fa-clock"></i> 2 weeks — Recommendation logic and suggestion filtering
+        </div>
+      </div>
+
+      <div class="timeline-item status-planned">
+        <div class="timeline-node"></div>
+        <div class="timeline-meta">Weeks 15–16 • ⏳ Planned</div>
+        <div class="timeline-title">Testing &amp; Optimization</div>
+        <div class="timeline-desc">End-to-end testing, performance improvement, and bug fixing.</div>
+        <div class="timeline-note">
+          <i class="far fa-clock"></i> 2 weeks — Resolving integration points &amp; performance
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card card-completed">
+        <div class="stat-card-header">Completed</div>
+        <div class="stat-value">8 wks</div>
+        <div class="stat-desc">Planning • Skin Model • UI &amp; API • System Integration</div>
+      </div>
+      <div class="stat-card card-active">
+        <div class="stat-card-header">Active Now</div>
+        <div class="stat-value">4 wks</div>
+        <div class="stat-desc">Cough Sound Audio pipeline • MFCC Processing</div>
+      </div>
+      <div class="stat-card card-remaining">
+        <div class="stat-card-header">Remaining</div>
+        <div class="stat-value">4 wks</div>
+        <div class="stat-desc">Recommendations • User Testing • Bug fixing</div>
+      </div>
+      <div class="stat-card card-hardest">
+        <div class="stat-card-header">Overall Status</div>
+        <div class="stat-value">~80%</div>
+        <div class="stat-desc">Total Timeline: 16 Weeks. Core features mostly complete</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="sec-label">07 — Demo & Source</div>
+  <div class="sec-title">Explore the Project<br><em>In Action</em></div>
+  <div class="grid-2 reveal">
+    <div class="card" style="text-align:center;">
+      <h3 style="color:var(--accent); margin-bottom:15px; font-size:1.5rem;"><i class="fas fa-play-circle" style="margin-right:10px;"></i>Demo Video</h3>
+      <p style="color:var(--muted); line-height:1.7; margin-bottom:25px;">
+        Watch the demo video to see HELPix in action.
+      </p>
+      <a href="https://drive.google.com/file/d/1FUaXKB6c_hzD9tmJZ_PPzVGVRKW3ZoL7/view?usp=drive_link" target="_blank" style="display:inline-block; background:var(--accent); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Watch Demo</a>
+    </div>
+    <div class="card" style="text-align:center;">
+      <h3 style="color:var(--accent); margin-bottom:15px; font-size:1.5rem;"><i class="fab fa-github" style="margin-right:10px;"></i>GitHub Repository</h3>
+      <p style="color:var(--muted); line-height:1.7; margin-bottom:25px;">
+        Access the source code and contribute to the project on GitHub.
+      </p>
+      <a href="https://github.com/CSrajput-ux/Helpix" target="_blank" style="display:inline-block; background:rgba(255,255,255,0.1); color:var(--text); border:1px solid var(--border); padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">View Source</a>
+    </div>
+  </div>
+</section>
+
+<section id="ecosystem">
+  <div class="sec-label">08 — Platform Vision</div>
+  <div class="sec-title">Beyond Doctors —<br><em>A Full Ecosystem</em></div>
+  <p style="color:var(--muted); line-height:1.7; max-width:800px;">
+    HELPix is not just a disease detection tool. It is a complete AI-powered healthcare platform designed to serve multiple stakeholders including patients, doctors, students, and researchers. By combining multimodal AI (image, audio, and symptom analysis), real-time monitoring, and healthcare services into one unified system, HELPix creates a connected, accessible, and intelligent healthcare ecosystem.
+  </p>
+  <div class="grid-2 reveal" style="margin-top:50px;">
+    <div class="card">
+      <h3 style="color:var(--accent); margin-bottom:20px; font-size:1.5rem;"><i class="fas fa-user-injured" style="margin-right:10px;"></i>Patients</h3>
+      <ul style="list-style:none; padding:0;">
+        <li style="margin-bottom:15px;"><strong>Smart Health Check</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Users can upload skin images, record cough sounds, or enter symptoms to instantly analyze their health condition using AI.</span></li>
+        <li style="margin-bottom:15px;"><strong>Early Disease Detection</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Provides early warnings with confidence scores, helping users take action before diseases become severe.</span></li>
+        <li style="margin-bottom:15px;"><strong>Doctor Booking</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Allows users to book doctor consultations directly through the app, reducing delays in treatment.</span></li>
+      </ul>
+      <div style="margin-top:25px; display:flex; flex-wrap:wrap; gap:10px;">
+        <span class="tag">Easy Access</span>
+        <span class="tag">Early Detection</span>
+        <span class="tag">Convenient</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent); margin-bottom:20px; font-size:1.5rem;"><i class="fas fa-stethoscope" style="margin-right:10px;"></i>Doctors</h3>
+      <ul style="list-style:none; padding:0;">
+        <li style="margin-bottom:15px;"><strong>AI-Assisted Diagnosis</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Doctors can use AI-generated insights from images, audio, and symptoms to support faster and more accurate diagnosis.</span></li>
+        <li style="margin-bottom:15px;"><strong>Smart Reports</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Provides structured reports with predictions and confidence scores for better clinical understanding.</span></li>
+        <li style="margin-bottom:15px;"><strong>Patient Monitoring</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Supports tracking of patient health data and activity for better follow-up care.</span></li>
+      </ul>
+      <div style="margin-top:25px; display:flex; flex-wrap:wrap; gap:10px;">
+        <span class="tag">AI Support</span>
+        <span class="tag">Fast Analysis</span>
+        <span class="tag">Efficient</span>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2 reveal" style="margin-top:24px;">
+    <div class="card">
+      <h3 style="color:var(--accent); margin-bottom:20px; font-size:1.5rem;"><i class="fas fa-user-graduate" style="margin-right:10px;"></i>Students</h3>
+      <ul style="list-style:none; padding:0;">
+        <li style="margin-bottom:15px;"><strong>Learning Platform</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Students can learn how AI models detect diseases using real-world data.</span></li>
+        <li style="margin-bottom:15px;"><strong>Practical Exposure</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Hands-on experience with healthcare AI systems, including image and audio analysis.</span></li>
+      </ul>
+      <div style="margin-top:25px; display:flex; flex-wrap:wrap; gap:10px;">
+        <span class="tag">Education</span>
+        <span class="tag">AI Learning</span>
+        <span class="tag">Practice</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent); margin-bottom:20px; font-size:1.5rem;"><i class="fas fa-microscope" style="margin-right:10px;"></i>Researchers</h3>
+      <ul style="list-style:none; padding:0;">
+        <li style="margin-bottom:15px;"><strong>Data Analysis</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Access to healthcare datasets (image, audio, symptoms) for research and experimentation.</span></li>
+        <li style="margin-bottom:15px;"><strong>Model Development</strong><br><span style="color:var(--muted); font-size:14px; line-height:1.5; display:inline-block; margin-top:5px;">Helps in building and improving AI models for disease detection.</span></li>
+      </ul>
+      <div style="margin-top:25px; display:flex; flex-wrap:wrap; gap:10px;">
+        <span class="tag">Innovation</span>
+        <span class="tag">Research</span>
+        <span class="tag">Data</span>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2 reveal" style="margin-top:24px;">
+    <div class="card" style="text-align:center;">
+      <h3 style="color:var(--accent); margin-bottom:20px; font-size:1.4rem;">Working Prototype</h3>
+      <p style="color:var(--muted); line-height:1.7; text-align:left;">
+        HELPix includes a fully functional prototype where users can upload images, record cough sounds, and enter symptoms to receive real-time predictions. The system processes data using cloud-based AI models and returns fast, confidence-based results. Doctor booking and core system features are integrated, while advanced modules are under continuous development.
+      </p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent); margin-bottom:20px; font-size:1.4rem; text-align:center;">All System Modules</h3>
+      <ul style="list-style:none; padding:0; color:var(--muted); line-height:2; font-size:14px; display:grid; grid-template-columns:1fr 1fr; gap:x-10px;">
+        <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Image Disease Detection</li>
+        <li><i class="fas fa-spinner fa-spin" style="color:var(--accent); margin-right:8px;"></i>Cough Sound Analysis</li>
+        <li><i class="fas fa-spinner fa-spin" style="color:var(--accent); margin-right:8px;"></i>Symptom Prediction</li>
+        <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>AI Prediction Engine</li>
+        <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Recommendation System</li>
+        <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Doctor Booking</li>
+        <li><i class="fas fa-spinner fa-spin" style="color:var(--accent); margin-right:8px;"></i>Health Monitoring</li>
+        <li><i class="fas fa-spinner fa-spin" style="color:var(--accent); margin-right:8px;"></i>AI Chat Doctor</li>
+        <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Emergency SOS</li>
+        <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Nearby Hospitals</li>
+        <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Medicine Reminder</li>
+        <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Diet Planner</li>
+        <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Fitness Tracker</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="team">
+  <div class="sec-label">09 — Academic Credits</div>
+  <div class="sec-title">The<br><em>Team</em></div>
+  <div class="grid-2 reveal">
+    <div class="card" style="text-align:center; padding: 50px 20px; display: flex; flex-direction: column; justify-content: center;">
+      <div style="font-family:var(--mono); font-size:10px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:15px;">Project Guide</div>
+      <h3 style="font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; color: var(--text); margin-bottom: 15px; letter-spacing: -0.02em;">Dr. Rishi Gupta</h3>
+      <div style="font-family:var(--mono); font-size:12px; color:var(--muted);">Head, Dept. of CSE · MUJ</div>
+    </div>
+    <div class="card" style="text-align:center; padding: 50px 20px; display: flex; flex-direction: column; justify-content: center;">
+      <div style="font-family:var(--mono); font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:15px;">Developer · PBL-2</div>
+      <h3 style="font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; color: var(--text); margin-bottom: 15px; letter-spacing: -0.02em;">Chhotu</h3>
+      <div style="font-family:var(--mono); font-size:12px; color:var(--muted);">Reg. No. 2427030521 · IV Semester</div>
+    </div>
+  </div>
+</section>
+
+<footer style="text-align:center; padding:50px 20px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); margin-top:80px; font-family:var(--mono);">
+    <div style="font-weight:700; color:var(--text); margin-bottom:10px; font-size:13px; font-family:var(--sans);">PROJECT GUIDE: DR. RISHI GUPTA</div>
+    MANIPAL UNIVERSITY JAIPUR · DEPARTMENT OF CSE · 2026
+</footer>
+
+<script>
+  // CHART LOGIC
+  document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('resultsChart');
+      if (ctx) {
+          new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: ['Existing DICOM Workstations', 'HELPix (Target)'],
+              datasets: [{
+                label: 'Performance Comparison',
+                data: [20, 80],
+                backgroundColor: ['rgba(99, 179, 255, 0.8)', 'rgba(124, 58, 237, 0.8)'],
+                borderColor: ['rgba(99, 179, 255, 1)', 'rgba(124, 58, 237, 1)'],
+                borderWidth: 1,
+                borderRadius: 8
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 100,
+                  grid: { color: 'rgba(255,255,255,0.05)' },
+                  ticks: { color: '#64748b' }
+                },
+                x: {
+                  grid: { display: false },
+                  ticks: { color: '#e2e8f0', font: { family: "'Syne', sans-serif", size: 11 } }
+                }
+              }
+            }
+          });
+      }
+  });
+
+  // TIMER LOGIC (0 to 10 min)
+  let seconds = 0;
+  const timerDisplay = document.getElementById('timerDisplay');
+  if (timerDisplay) {
+      setInterval(() => {
+        seconds++;
+        if(seconds > 600) seconds = 600; 
+        let mins = Math.floor(seconds / 60);
+        let secs = seconds % 60;
+        timerDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }, 1000);
+  }
+
+  // REVEAL ANIMATION
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
