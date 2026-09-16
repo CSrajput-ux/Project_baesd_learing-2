@@ -75,6 +75,8 @@
     /* GRIDS */
     .grid-2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
     @media(max-width:768px){ .grid-2 { grid-template-columns: 1fr; } }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    @media(max-width:768px){ .grid-3 { grid-template-columns: 1fr; } }
     
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 36px; }
     .tag { background: rgba(59,139,255,.1); color: var(--accent); border-radius: 99px; padding: 4px 12px; font-size: 10px; font-weight: 600; font-family: var(--mono); }
@@ -85,8 +87,8 @@
     .progress-labels-top .now-label { color: var(--accent); position: absolute; left: 50%; transform: translateX(-50%); font-weight: bold; }
     .progress-track { height: 4px; background-color: var(--surface2); border-radius: 2px; position: relative; margin-bottom: 1rem; display: flex; }
     .progress-fill-done { height: 100%; background-color: var(--accent); width: 50%; border-radius: 2px 0 0 2px; }
-    .progress-fill-active { height: 100%; background-color: var(--accent2); width: 30%; }
-    .progress-pill-percentage { position: absolute; left: 80%; top: 50%; transform: translate(-50%, -50%); background-color: var(--bg); color: var(--accent); padding: 2px 6px; border-radius: 8px; font-size: 10px; border: 1px solid var(--border); z-index: 2; font-weight:700; }
+    .progress-fill-active { height: 100%; background-color: var(--accent2); width: 45%; }
+    .progress-pill-percentage { position: absolute; left: 95%; top: 50%; transform: translate(-50%, -50%); background-color: var(--bg); color: var(--accent); padding: 2px 6px; border-radius: 8px; font-size: 10px; border: 1px solid var(--border); z-index: 2; font-weight:700; }
     .progress-labels-bottom { display: flex; color: var(--muted); font-size: 11px; }
     
     .timeline-panel { background-color: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 3rem 2rem; position: relative; margin-bottom: 2rem; }
@@ -98,10 +100,14 @@
     .status-active .timeline-node { background-color: var(--accent); border: 2px solid var(--bg); box-shadow: 0 0 15px rgba(59,139,255,0.4); }
     .status-active::before { content: ''; position: absolute; left: 0.95rem; top: -0.3rem; width: 29px; height: 29px; border: 1px solid rgba(59,139,255,0.3); border-radius: 50%; pointer-events: none; }
     
+    .status-planned .timeline-node { background-color: var(--green); border-color: var(--green); box-shadow: 0 0 10px rgba(16,185,129,0.3); }
+    .status-hold .timeline-node { background-color: #ef4444; border-color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+    
     .timeline-meta { font-family: var(--mono); font-size: 11px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; }
     .status-done .timeline-meta { color: var(--green); }
     .status-active .timeline-meta { color: var(--accent); }
-    .status-planned .timeline-meta { color: var(--muted); }
+    .status-planned .timeline-meta { color: var(--green); }
+    .status-hold .timeline-meta { color: #ef4444; }
     .timeline-title { font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; letter-spacing: -0.02em; }
     .timeline-desc { font-size: 0.90rem; line-height: 1.6; color: var(--muted); margin-bottom: 1rem; max-width: 90%; }
     .timeline-note { background-color: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 1rem; font-family: var(--mono); font-size: 11px; color: var(--muted); display: inline-flex; align-items: center; gap: 0.5rem; }
@@ -147,14 +153,16 @@
     <a href="#results">Results</a>
     <a href="#roadmap">Roadmap</a>
     <a href="#demo">Demo</a>
+    <a href="#research">Research</a>
     <a href="#team">Team</a>
+    <a href="https://drive.google.com/file/d/1gYYPLOWLMzaOG7iG3eIFVdV_CyyUVLbK/view?usp=sharing" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Research Paper</a>
   </div>
 </nav>
 
 <div class="hero">
   <div class="reveal visible">
     <div style="font-family:var(--mono); font-size:11px; color:var(--muted); margin-bottom:20px; background: var(--surface2); padding: 8px 16px; border-radius: 12px; display: inline-block;">
-      <span style="color: var(--accent); font-weight: 700;">REG:</span> 2427030521 · Dept. of Computer Science & Engineering, MUJ · <span style="color: var(--accent); font-weight: 700;">IV Semester</span>
+      <span style="color: var(--accent); font-weight: 700;">REG:</span> 2427030521 · Dept. of Computer Science & Engineering, MUJ · <span style="color: var(--accent); font-weight: 700;">Semester 5</span>
     </div>
     <h1 class="hero-h1">HELPix</h1>
     <p style="font-family:var(--serif); font-style:italic; font-size:1.4rem; color:var(--muted); margin-top:10px;">
@@ -171,11 +179,11 @@
         </div>
         <div>
             <div style="font-size:9px; color:var(--muted); text-transform:uppercase;">Platform</div>
-            <div style="font-weight:700;">Android</div>
+            <div style="font-weight:700;">Web App</div>
         </div>
         <div>
             <div style="font-size:9px; color:var(--muted); text-transform:uppercase;">Session</div>
-            <div style="font-weight:700;">Jan-May 2026</div>
+            <div style="font-weight:700;">July to September 2026</div>
         </div>
     </div>
   </div>
@@ -217,7 +225,7 @@
     <span class="tag">Disease Detection</span>
     <span class="tag">Multimodal AI</span>
     <span class="tag">CNN Model</span>
-    <span class="tag">Cough Analysis</span>
+    <span class="tag">Cough Analysis (On Hold)</span>
     <span class="tag">Skin Detection</span>
     <span class="tag">Symptom Checker</span>
     <span class="tag">Offline AI</span>
@@ -268,7 +276,7 @@
       <div class="card">
         <h3 style="color:var(--muted); font-size:1.5rem; margin-bottom:10px;">Data Source</h3>
         <p style="color:var(--muted); line-height:1.7;">
-          Uses Coswara (cough audio), skin disease image datasets, and structured symptom-based data for training deep learning models.
+          Uses Coswara (cough audio), skin cancer image datasets (HAM10000, ISIC 2024, BCN 20000), and structured symptom-based data for training deep learning models.
         </p>
       </div>
     </div>
@@ -325,7 +333,7 @@
     <div class="card" style="padding:25px; display:flex; flex-direction:column; gap:5px;">
       <div style="font-size:24px; margin-bottom:10px;">🎵</div>
       <h3 style="color:var(--text); font-size:1.1rem; margin-bottom:0; font-weight:700;">Librosa</h3>
-      <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Audio Processing</div>
+      <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Audio Processing (On Hold)</div>
       <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-top:10px;">Used to extract MFCC features from cough and breathing sounds for audio-based disease detection.</p>
     </div>
     <div class="card" style="padding:25px; display:flex; flex-direction:column; gap:5px;">
@@ -350,7 +358,7 @@
       <div style="font-size:24px; margin-bottom:10px;">🗂️</div>
       <h3 style="color:var(--text); font-size:1.1rem; margin-bottom:0; font-weight:700;">Dataset Sources</h3>
       <div style="font-family:var(--mono); font-size:10px; color:var(--muted);">Training Data</div>
-      <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-top:10px;">Coswara (Cough Audio), Skin Disease Image Datasets, and Symptom-based datasets used for training.</p>
+      <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-top:10px;">Coswara (Cough Audio), Skin Cancer Image Datasets (HAM10000, ISIC 2024, BCN 20000), and Symptom-based datasets used for training.</p>
     </div>
   </div>
   
@@ -366,7 +374,7 @@
     <div class="card" style="margin-bottom:15px; padding:25px 30px; display:flex; align-items:flex-start; gap:25px;">
       <div style="font-family:var(--mono); font-size:2.5rem; font-weight:800; color:rgba(59,139,255,0.4); line-height:1;">02</div>
       <div>
-        <h4 style="color:var(--text); font-size:1.1rem; margin-bottom:8px; font-weight:700;">Sound Analysis Module</h4>
+        <h4 style="color:var(--text); font-size:1.1rem; margin-bottom:8px; font-weight:700;">Sound Analysis Module (On Hold)</h4>
         <p style="color:var(--muted); font-size:13px; line-height:1.6;">Processes cough and voice signals using MFCC feature extraction and machine learning models to detect respiratory diseases.</p>
       </div>
     </div>
@@ -443,13 +451,13 @@ model.summary()
   <div class="grid-2 reveal">
     <div>
         <h3 style="color: var(--accent); margin-bottom:10px;">System Performance</h3>
-        <p style="color: var(--muted); line-height:1.5;">Skin Disease Model Accuracy<br><strong style="color: var(--green);">98%+ (CNN Model Successfully Trained & Deployed)</strong></p>
+        <p style="color: var(--muted); line-height:1.5;">Skin Disease Model Accuracy<br><strong style="color: var(--green);">98%+ (CNN Model Successfully Trained & Offline Deployed)</strong><br><span style="font-size:12px; color: var(--muted);">*Note: Offline deployment used as free cloud quotas are insufficient for this model.</span></p>
         <h3 style="color: var(--accent); margin-top: 30px; margin-bottom:10px;">Application Status</h3>
         <p style="color: var(--muted);">Full Web Application Running Smoothly</p>
         <h3 style="color: var(--accent); margin-top: 30px; margin-bottom:10px;">Core Modules Completed</h3>
         <p style="color: var(--muted);">5 / 5 (Image Detection, API, UI, Prediction Engine, Results System)</p>
         <h3 style="color: var(--accent); margin-top: 30px; margin-bottom:10px;">Prediction Speed</h3>
-        <p style="color: var(--muted);">Real-Time Results via Cloud-Based Processing</p>
+        <p style="color: var(--muted);">Real-Time Results via Local Processing</p>
     </div>
     <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px;">
         <canvas id="resultsChart" style="max-width: 100%; height: 300px; display:block; margin:auto;"></canvas>
@@ -494,7 +502,7 @@ model.summary()
         <tr style="background: var(--surface2);">
           <td style="padding: 15px; border-bottom:1px solid var(--border);">Cough Sound Module</td>
           <td style="padding: 15px; color:var(--muted); border-bottom:1px solid var(--border);">Detect respiratory patterns</td>
-          <td style="padding: 15px; color: var(--accent); border-bottom:1px solid var(--border);">In Progress</td>
+          <td style="padding: 15px; color: var(--accent); border-bottom:1px solid var(--border);">On Hold</td>
         </tr>
         <tr style="background: var(--surface);">
           <td style="padding: 15px; border-bottom:1px solid var(--border);">Prescription System</td>
@@ -520,7 +528,7 @@ model.summary()
       <div class="progress-track">
         <div class="progress-fill-done"></div>
         <div class="progress-fill-active"></div>
-        <div class="progress-pill-percentage">~80%</div>
+        <div class="progress-pill-percentage">~95%</div>
       </div>
       <div class="progress-labels-bottom">
         <span>Estimated total: 16 weeks · Current: Week 8 of 16</span>
@@ -570,13 +578,13 @@ model.summary()
         </div>
       </div>
 
-      <div class="timeline-item status-active">
+      <div class="timeline-item status-hold">
         <div class="timeline-node"></div>
-        <div class="timeline-meta">Weeks 9–12 • 🔄 In Progress</div>
-        <div class="timeline-title">Cough Sound Detection Module</div>
+        <div class="timeline-meta">Weeks 9–12 • ⏸️ On Hold</div>
+        <div class="timeline-title">Cough Sound Detection Module (On Hold)</div>
         <div class="timeline-desc">Audio preprocessing (MFCC), model training, and integration into system.</div>
         <div class="timeline-note">
-          <i class="fas fa-spinner fa-spin"></i> 4 weeks — MFCC spectrogram pipeline is the heaviest remaining task
+          <i class="fas fa-pause-circle"></i> 4 weeks — Module development is currently on hold
         </div>
       </div>
 
@@ -594,7 +602,7 @@ model.summary()
         <div class="timeline-node"></div>
         <div class="timeline-meta">Weeks 15–16 • ⏳ Planned</div>
         <div class="timeline-title">Testing &amp; Optimization</div>
-        <div class="timeline-desc">End-to-end testing, performance improvement, and bug fixing.</div>
+        <div class="timeline-desc">Training a new model every week and testing it on real-world parameters. End-to-end testing, performance improvement, and bug fixing.</div>
         <div class="timeline-note">
           <i class="far fa-clock"></i> 2 weeks — Resolving integration points &amp; performance
         </div>
@@ -607,10 +615,10 @@ model.summary()
         <div class="stat-value">8 wks</div>
         <div class="stat-desc">Planning • Skin Model • UI &amp; API • System Integration</div>
       </div>
-      <div class="stat-card card-active">
-        <div class="stat-card-header">Active Now</div>
+      <div class="stat-card card-planned">
+        <div class="stat-card-header">On Hold</div>
         <div class="stat-value">4 wks</div>
-        <div class="stat-desc">Cough Sound Audio pipeline • MFCC Processing</div>
+        <div class="stat-desc">Cough Sound Audio pipeline • MFCC Processing (On Hold)</div>
       </div>
       <div class="stat-card card-remaining">
         <div class="stat-card-header">Remaining</div>
@@ -619,7 +627,7 @@ model.summary()
       </div>
       <div class="stat-card card-hardest">
         <div class="stat-card-header">Overall Status</div>
-        <div class="stat-value">~80%</div>
+        <div class="stat-value">~95%</div>
         <div class="stat-desc">Total Timeline: 16 Weeks. Core features mostly complete</div>
       </div>
     </div>
@@ -627,9 +635,9 @@ model.summary()
 </section>
 
 <section id="demo">
-  <div class="sec-label">07 — Demo & Source</div>
+  <div class="sec-label">07 — Demo, Source & App</div>
   <div class="sec-title">Explore the Project<br><em>In Action</em></div>
-  <div class="grid-2 reveal">
+  <div class="grid-3 reveal">
     <div class="card" style="text-align:center;">
       <h3 style="color:var(--accent); margin-bottom:15px; font-size:1.5rem;"><i class="fas fa-play-circle" style="margin-right:10px;"></i>Demo Video</h3>
       <p style="color:var(--muted); line-height:1.7; margin-bottom:25px;">
@@ -643,6 +651,14 @@ model.summary()
         Access the source code and contribute to the project on GitHub.
       </p>
       <a href="https://github.com/CSrajput-ux/Helpix" target="_blank" style="display:inline-block; background:rgba(255,255,255,0.1); color:var(--text); border:1px solid var(--border); padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">View Source</a>
+    </div>
+    <div class="card" style="text-align:center; position:relative; overflow:hidden;">
+      <div style="position:absolute; top:-20px; right:-20px; font-size:8rem; opacity:0.05; color:var(--green);"><i class="fab fa-android"></i></div>
+      <h3 style="color:var(--green); margin-bottom:15px; font-size:1.5rem; position:relative;"><i class="fab fa-android" style="margin-right:10px;"></i>Download APK</h3>
+      <p style="color:var(--muted); line-height:1.7; margin-bottom:25px; position:relative;">
+        Experience HELPix directly on your Android device. Download the APK file here.
+      </p>
+      <a href="https://drive.google.com/file/d/1t-1JA5GrbCFo0kb9UH7w7nHQor6TJ0LZ/view?usp=sharing" target="_blank" style="display:inline-block; background:var(--green); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600; position:relative;"><i class="fas fa-download" style="margin-right:8px;"></i>Get APK</a>
     </div>
   </div>
 </section>
@@ -718,7 +734,7 @@ model.summary()
       <h3 style="color:var(--accent); margin-bottom:20px; font-size:1.4rem; text-align:center;">All System Modules</h3>
       <ul style="list-style:none; padding:0; color:var(--muted); line-height:2; font-size:14px; display:grid; grid-template-columns:1fr 1fr; gap:x-10px;">
         <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Image Disease Detection</li>
-        <li><i class="fas fa-spinner fa-spin" style="color:var(--accent); margin-right:8px;"></i>Cough Sound Analysis</li>
+        <li><i class="fas fa-pause-circle" style="color:var(--muted); margin-right:8px;"></i>Cough Sound Analysis (On Hold)</li>
         <li><i class="fas fa-spinner fa-spin" style="color:var(--accent); margin-right:8px;"></i>Symptom Prediction</li>
         <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>AI Prediction Engine</li>
         <li><i class="fas fa-check-circle" style="color:var(--green); margin-right:8px;"></i>Recommendation System</li>
@@ -735,8 +751,52 @@ model.summary()
   </div>
 </section>
 
+<section id="research">
+  <div class="sec-label">09 — Research Publication</div>
+  <div class="sec-title">Scientific<br><em>Foundations</em></div>
+  
+  <div class="card reveal" style="margin-bottom: 24px; border-left: 4px solid var(--accent2);">
+    <h3 style="margin-bottom:15px; font-size: 1.6rem;">Reliability-Oriented Skin-Lesion Classification Using HELPix-R</h3>
+    <p style="color:var(--muted); line-height:1.7;">
+      Our research focuses on building a highly reliable deep-learning framework (HELPix-R) that goes beyond simple accuracy. We emphasize calibration, explainability, uncertainty estimation, and rigorous external testing to address the critical gaps between lab performance and real-world clinical use. To date, the system has been successfully tested on over 500 individuals in real-world clinical scenarios.
+    </p>
+  </div>
+
+  <div class="grid-2 reveal">
+    <div class="card">
+      <h3 style="color:var(--accent); margin-bottom:20px;"><i class="fas fa-shield-alt" style="margin-right:10px;"></i>Rigorous Data Auditing</h3>
+      <p style="color:var(--muted); line-height:1.7;">
+        To prevent data leakage, an extensive duplicate audit using <strong>SHA-256 and perceptual hashing</strong> was performed across large repositories (ISIC 2024, HAM10000, and BCN20000). This ensured strict independence between training, validation, and testing splits.
+      </p>
+    </div>
+    
+    <div class="card">
+      <h3 style="color:var(--green); margin-bottom:20px;"><i class="fas fa-chart-line" style="margin-right:10px;"></i>Performance vs. Transportability</h3>
+      <p style="color:var(--muted); line-height:1.7;">
+        HELPix-R demonstrated exceptional internal discrimination with an <strong>AUROC of 0.9778 (97.78%)</strong>. However, independent testing on smartphone-captured images (PAD-UFES-20) revealed performance degradation, highlighting the real-world challenge of domain shift and transportability in medical AI.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid-2 reveal" style="margin-top:24px;">
+    <div class="card">
+      <h3 style="color:var(--accent2); margin-bottom:20px;"><i class="fas fa-brain" style="margin-right:10px;"></i>Explainable AI (XAI)</h3>
+      <p style="color:var(--muted); line-height:1.7;">
+        We utilized <strong>Grad-CAM</strong> for visual attribution to see which lesion regions influenced the model's predictions. A quantitative deletion experiment verified that masking these salient regions effectively reduced malignancy probabilities, confirming attribution sensitivity.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 style="color:#f59e0b; margin-bottom:20px;"><i class="fas fa-balance-scale" style="margin-right:10px;"></i>Calibration & Uncertainty</h3>
+      <p style="color:var(--muted); line-height:1.7;">
+        High accuracy isn't enough if confidence scores are distorted. We applied <strong>Temperature Scaling</strong> to calibrate probabilities and <strong>Monte Carlo Dropout</strong> to estimate predictive uncertainty, ensuring the model's outputs are highly reliable.
+      </p>
+    </div>
+  </div>
+</section>
+
 <section id="team">
-  <div class="sec-label">09 — Academic Credits</div>
+  <div class="sec-label">10 — Academic Credits</div>
   <div class="sec-title">The<br><em>Team</em></div>
   <div class="grid-2 reveal">
     <div class="card" style="text-align:center; padding: 50px 20px; display: flex; flex-direction: column; justify-content: center;">
@@ -747,7 +807,7 @@ model.summary()
     <div class="card" style="text-align:center; padding: 50px 20px; display: flex; flex-direction: column; justify-content: center;">
       <div style="font-family:var(--mono); font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:15px;">Developer · PBL-2</div>
       <h3 style="font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; color: var(--text); margin-bottom: 15px; letter-spacing: -0.02em;">Chhotu</h3>
-      <div style="font-family:var(--mono); font-size:12px; color:var(--muted);">Reg. No. 2427030521 · IV Semester</div>
+      <div style="font-family:var(--mono); font-size:12px; color:var(--muted);">Reg. No. 2427030521 · Semester 5</div>
     </div>
   </div>
 </section>
@@ -765,10 +825,10 @@ model.summary()
           new Chart(ctx.getContext('2d'), {
             type: 'bar',
             data: {
-              labels: ['Existing DICOM Workstations', 'HELPix (Target)'],
+              labels: ['Existing Systems', 'HELPix (Cancer Accuracy)'],
               datasets: [{
-                label: 'Performance Comparison',
-                data: [20, 80],
+                label: 'Accuracy (%)',
+                data: [60, 80.75],
                 backgroundColor: ['rgba(99, 179, 255, 0.8)', 'rgba(124, 58, 237, 0.8)'],
                 borderColor: ['rgba(99, 179, 255, 1)', 'rgba(124, 58, 237, 1)'],
                 borderWidth: 1,
